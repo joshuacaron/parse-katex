@@ -1,0 +1,15 @@
+{
+  "name": "parse-katex",
+  "version": "0.1.0",
+  "description": "Parses all math sections inside HTML code with KaTeX.",
+  "main": "main.js",
+  "keywords": [
+    "katex",
+    "latex"
+  ],
+  "author": "Joshua Caron",
+  "license": "MIT",
+  "dependencies": {
+    "katex": "^0.2.0"
+  }
+}
