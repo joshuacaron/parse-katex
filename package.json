@@ -7,9 +7,17 @@
     "katex",
     "latex"
   ],
-  "author": "Joshua Caron",
+  "author": "Joshua Caron <joshua@joshuacaron.ca> (https://www.joshuacaron.ca)",
   "license": "MIT",
   "dependencies": {
     "katex": "^0.2.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshuacaron/parse-katex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/joshuacaron/parse-katex/issues"
+  },
+  "homepage": "https://github.com/joshuacaron/parse-katex"
 }
