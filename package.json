@@ -12,6 +12,9 @@
   "dependencies": {
     "katex": "^0.2.0"
   },
+  "scripts":{
+    "test": "mocha"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/joshuacaron/parse-katex.git"
@@ -19,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/joshuacaron/parse-katex/issues"
   },
-  "homepage": "https://github.com/joshuacaron/parse-katex"
+  "homepage": "https://github.com/joshuacaron/parse-katex",
+  "devDependencies": {
+    "mocha": "^2.2.1"
+  }
 }
