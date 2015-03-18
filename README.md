@@ -1,5 +1,5 @@
 # parse-katex
-Parses all math sections inside HTML code with KaTeX.
+Parses all math sections (marked by $ ... $ for inline equations, and $$ ... $$ for display mode) inside HTML code with KaTeX.
 
 To use simply include it and then call the function renderLaTeX like such:
 
