@@ -25,7 +25,7 @@ To use the Express.js template engine, simply use the `katex.templateEngine` fun
 
     var app = express();
 
-    app.engine('html', katex.viewTemplate);
+    app.engine('html', katex.templateEngine);
     app.set('view engine', 'html');
 
     app.get('/', function(req, res, next) {
