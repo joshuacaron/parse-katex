@@ -10,7 +10,7 @@ To install, run `npm install --save parse-katex`.
 Then, to use simply include it, and then call the function `renderLaTeX` (or `render` which is an alias) like such:
 
     var katex = require('parse-katex');
-     console = require('console');
+    var console = require('console');
         
     console.log(katex.renderLaTeX("<p>This is a sentence with an equation $a^2 + b^2 = c^2$</p>"));
 
@@ -20,10 +20,10 @@ On the user facing page, you still need to include the KaTeX CSS file (you *don'
 
 To use the Express.js template engine, simply use the `katex.templateEngine` function to declare the engine. The following example shows a minimal setup to render KaTeX in html files (note that the stylesheet is automatically appended to the head when using the template engine so there is no need to include it manually).
 
-    express = require('express');
-    katex = require('parse-katex');
+    var express = require('express');
+    var katex = require('parse-katex');
 
-    app = express();
+    var app = express();
 
     app.engine('html', katex.viewTemplate);
     app.set('view engine', 'html');
