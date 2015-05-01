@@ -1,4 +1,5 @@
 var katex = require('katex');
+var fs = require('fs');
 
 renderLaTeX = function(x){
   // Useless character that is unlikely to be typed. Need to hame some method to escape legitimate dollar signs.
@@ -16,7 +17,7 @@ renderLaTeX = function(x){
     if(splitDisplay.length>1 && splitDisplay.length%2==1){
       for(i=0;i<splitDisplay.length;++i){
         //Because of the way split works, all even indices are regular text, and odd are code that needs to be rendered.
-        if(i%2==0){
+        if(i%2===0){
           lineTemp += splitDisplay[i];
         }
         else {
@@ -35,7 +36,7 @@ renderLaTeX = function(x){
     splitInline = lineTemp.split("$");
     if(splitInline.length>1 && splitInline.length%2==1){
       for(k=0;k<splitInline.length;++k){
-        if(k%2==0){
+        if(k%2===0){
           line += splitInline[k];
         }
         else {
@@ -57,4 +58,17 @@ renderLaTeX = function(x){
   return output;
 }
 
-module.exports.renderLaTeX = renderLaTeX;
+templateEngine = function(filePath, options, callback) {
+  return fs.readFile(filePath, function(err, content) {
+    var rendered;
+    if (err) {
+      return callback(new Error(err));
+    }
+    rendered = renderLaTeX(content.toString());
+    rendered = rendered.replace("</head>", "<link rel=\"stylesheet\" type=\"text/css\" href=\"//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css\"></head>");
+    return callback(null, rendered);
+  });
+};
+
+
+module.exports = {renderLaTeX: renderLaTeX, render: renderLaTeX, templateEngine: templateEngine};
