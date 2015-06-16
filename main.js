@@ -1,29 +1,26 @@
 var katex = require('katex');
 var fs = require('fs');
 
-renderLaTeX = function(x){
-  // Useless character that is unlikely to be typed. Need to hame some method to escape legitimate dollar signs.
-  x = x.replace(/\\\$/g,"Ž");
- 
+var renderLaTeX = function(x){ 
   // Split into lines, since can't split LaTeX code over lines anyway, then any errors make the rest of the code still rendered.
-  lines = x.split("\n");
-  output = "";
-  for(j=0;j<lines.length;j++){
-    lineTemp = "";
-    line = "";
+  var lines = x.split("\n");
+  var output = "";
+  for(var j = 0; j < lines.length; j++){
+    var lineTemp = "";
+    var line = "";
     
     // First split by $$ so it doesn't mess up when splitting by $ later.
-    splitDisplay = lines[j].split("$$");
-    if(splitDisplay.length>1 && splitDisplay.length%2==1){
-      for(i=0;i<splitDisplay.length;++i){
+    var splitDisplay = lines[j].split("$$");
+    if(splitDisplay.length > 1 && splitDisplay.length % 2 === 1){
+      for(var i = 0; i<splitDisplay.length; ++i){
         //Because of the way split works, all even indices are regular text, and odd are code that needs to be rendered.
-        if(i%2===0){
+        if(i % 2 === 0){
           lineTemp += splitDisplay[i];
         }
         else {
           try{lineTemp += katex.renderToString(splitDisplay[i],{displayMode:true});}
           // Render unformatted text if there is an error
-          catch(err){lineTemp += "<p style=\"text-align:center;\">ŽŽ" + splitDisplay[i] + 'ŽŽ</p>';}
+          catch(err){lineTemp += "<p style=\"text-align:center;\">\$\$" + splitDisplay[i] + '\$\$</p>';}
         }
       }
     }
@@ -33,10 +30,19 @@ renderLaTeX = function(x){
     }
  
     // Repeat the process for inline math using $ ... $ to delimit
-    splitInline = lineTemp.split("$");
-    if(splitInline.length>1 && splitInline.length%2==1){
-      for(k=0;k<splitInline.length;++k){
-        if(k%2===0){
+    var splitInline = lineTemp.split(/((?!\\).{1})\$/g);
+
+    var l= 1
+    while(l < splitInline.length){
+      splitInline[l-1] += splitInline[l]
+      splitInline.splice(l, 1)
+      ;++l
+    }
+
+
+    if(splitInline.length > 1 && splitInline.length % 2 === 1){
+      for(var k = 0; k < splitInline.length; ++k){
+        if(k % 2 === 0){
           line += splitInline[k];
         }
         else {
@@ -54,11 +60,11 @@ renderLaTeX = function(x){
   }
   
   // Render escaped dollar signs back to $
-  output = output.replace(/Ž/g,"$");
+  output = output.replace(/\\\$/g,"$");
   return output;
 }
 
-templateEngine = function(filePath, options, callback) {
+var templateEngine = function(filePath, options, callback) {
   return fs.readFile(filePath, function(err, content) {
     var rendered;
     if (err) {
