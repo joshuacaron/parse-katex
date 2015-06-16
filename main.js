@@ -32,11 +32,11 @@ var renderLaTeX = function(x){
     // Repeat the process for inline math using $ ... $ to delimit
     var splitInline = lineTemp.split(/((?!\\).{1})\$/g);
 
-    var l= 1
+    var l = 1;
     while(l < splitInline.length){
-      splitInline[l-1] += splitInline[l]
-      splitInline.splice(l, 1)
-      ;++l
+      splitInline[l-1] += splitInline[l];
+      splitInline.splice(l, 1);
+      ++l;
     }
 
 
