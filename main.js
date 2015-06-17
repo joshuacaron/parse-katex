@@ -1,80 +1,78 @@
-var katex = require('katex');
-var fs = require('fs');
+var katex = require('katex')
+var fs = require('fs')
+var _ = require('lodash')
 
-var renderLaTeX = function(x){ 
-  // Split into lines, since can't split LaTeX code over lines anyway, then any errors make the rest of the code still rendered.
-  var lines = x.split("\n");
-  var output = "";
-  for(var j = 0; j < lines.length; j++){
-    var lineTemp = "";
-    var line = "";
-    
-    // First split by $$ so it doesn't mess up when splitting by $ later.
-    var splitDisplay = lines[j].split("$$");
-    if(splitDisplay.length > 1 && splitDisplay.length % 2 === 1){
-      for(var i = 0; i<splitDisplay.length; ++i){
-        //Because of the way split works, all even indices are regular text, and odd are code that needs to be rendered.
-        if(i % 2 === 0){
-          lineTemp += splitDisplay[i];
-        }
-        else {
-          try{lineTemp += katex.renderToString(splitDisplay[i],{displayMode:true});}
+var parseExpression = function(raw, delimit, delimitEscaped, mathMode) {
+  var lines = raw.split('\n')
+  var output = ''
+  for (var j = 0; j < lines.length; j++) {
+    var parsedLine = ''
+
+    // Split on delimiters if they are not escaped
+    var pattern = '((?!\\\\).{1})' + _.escapeRegExp(delimitEscaped)
+    var regex = new RegExp(pattern, 'g')
+    var splitLine = lines[j].split(regex)
+
+    // Add the characters before the delimitter to the previous line
+    var l = 1
+    while (l < splitLine.length) {
+      splitLine[l - 1] += splitLine[l]
+      splitLine.splice(l, 1)
+      ;++l
+    }
+
+    if (splitLine.length > 1 && splitLine.length % 2 === 1) {
+      // If there were matches and the code is well-formed, parse each math section (odd indices)
+      for (var i = 0; i < splitLine.length; ++i) {
+        if (i % 2 === 0) {
+          parsedLine += splitLine[i]
+        } else {
+          try {
+            parsedLine += katex.renderToString(splitLine[i],{displayMode: mathMode})
+          }
           // Render unformatted text if there is an error
-          catch(err){lineTemp += "<p style=\"text-align:center;\">\$\$" + splitDisplay[i] + '\$\$</p>';}
+          catch (err) {
+            parsedLine += '<p style=\"text-align:center;\">' + delimitEscaped + splitLine[i] + delimitEscaped + '</p>'
+          }
         }
       }
-    }
-    else {
+    } else {
       // If the LaTeX isn't wellformed (need matched $$s and at least 2), don't parse the line.
-      lineTemp = lines[j];
+      parsedLine = lines[j]
     }
- 
-    // Repeat the process for inline math using $ ... $ to delimit
-    var splitInline = lineTemp.split(/((?!\\).{1})\$/g);
-
-    var l = 1;
-    while(l < splitInline.length){
-      splitInline[l-1] += splitInline[l];
-      splitInline.splice(l, 1);
-      ++l;
-    }
-
-
-    if(splitInline.length > 1 && splitInline.length % 2 === 1){
-      for(var k = 0; k < splitInline.length; ++k){
-        if(k % 2 === 0){
-          line += splitInline[k];
-        }
-        else {
-          try{line += katex.renderToString(splitInline[k]);}
-          catch(err){line += '$' + splitInline[k] + '$';}
-        }
-      }
-    }
-    else {
-      line = lineTemp;
-    }
- 
-    // Sum all the lines back up.
-    output += line;
+    // Sum up the resulting lines and add newlines back in
+    output += j < lines.length - 1 ? parsedLine + '\n' : parsedLine
   }
-  
+  return output
+}
+
+var renderLaTeX = function(unparsed) {
+  // Need to parse for $$ first so it doesn't cause problems when check for $
+  var parsed = parseExpression(unparsed, '$$', '\$\$', true)
+  parsed = parseExpression(parsed, '$', '\$', false)
+
+  // Remove final newlines, to minimize the code
+  parsed = parsed.replace(/\n/g, '')
+
   // Render escaped dollar signs back to $
-  output = output.replace(/\\\$/g,"$");
-  return output;
+  parsed = parsed.replace(/\\\$/g, '$')
+  return parsed
 }
 
 var templateEngine = function(filePath, options, callback) {
+  var cssFile = '<link rel=\"stylesheet\" type=\"text/css\" href=\"//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css\">'
+
   return fs.readFile(filePath, function(err, content) {
-    var rendered;
-    if (err) {
-      return callback(new Error(err));
-    }
-    rendered = renderLaTeX(content.toString());
-    rendered = rendered.replace("</head>", "<link rel=\"stylesheet\" type=\"text/css\" href=\"//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css\"></head>");
-    return callback(null, rendered);
-  });
-};
+    if (err) return callback(new Error(err))
+      
+    var rendered = renderLaTeX(content.toString())
+    rendered = rendered.replace('</head>', cssFile + '</head>')
+    return callback(null, rendered)
+  })
+}
 
-
-module.exports = {renderLaTeX: renderLaTeX, render: renderLaTeX, templateEngine: templateEngine};
+module.exports = 
+{ renderLaTeX: renderLaTeX
+, render: renderLaTeX
+, templateEngine: templateEngine
+}

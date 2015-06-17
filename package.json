@@ -10,9 +10,10 @@
   "author": "Joshua Caron <joshua@joshuacaron.ca> (https://www.joshuacaron.ca)",
   "license": "MIT",
   "dependencies": {
-    "katex": "^0.2.0"
+    "katex": "^0.2.0",
+    "lodash": "^3.9.3"
   },
-  "scripts":{
+  "scripts": {
     "test": "mocha"
   },
   "repository": {
