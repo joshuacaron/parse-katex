@@ -2,12 +2,21 @@ var katex = require('katex')
 var fs = require('fs')
 var _ = require('lodash')
 
-var parseExpression = function(raw, delimit, delimitEscaped, mathMode, finalPass) {
+var delimitInitial
+
+function parseExpression(raw, delimit, delimitEscaped, mathMode, finalPass) {
   finalPass = finalPass || false
   var lines = raw.split('\n')
   var output = ''
+
   for (var j = 0; j < lines.length; j++) {
     var parsedLine = ''
+
+    // Add a space if first character is a delimitter so that it gets properly formatted
+    if (lines[j][0] === delimit[0]) {
+      lines[j] = ' ' + lines[j]
+      delimitInitial = true
+    }
 
     // Split on delimiters if they are not escaped
     var pattern = '((?!\\\\).{1})' + _.escapeRegExp(delimitEscaped)
@@ -32,21 +41,26 @@ var parseExpression = function(raw, delimit, delimitEscaped, mathMode, finalPass
     // Sum up the resulting lines and add newlines back in
     output += j < lines.length - 1 && !finalPass ? parsedLine + '\n' : parsedLine
   }
+
+  if (delimitInitial && finalPass) {
+    output = output.slice(1, output.length)
+  }
+
   return output
 
-  function processLine(rawLine){
+  function processLine(rawLine) {
     var parsedLine = ''
     for (var i = 0; i < rawLine.length; ++i) {
       if (i % 2 === 0) {
         parsedLine += rawLine[i]
       } else {
         try {
-          parsedLine += katex.renderToString(rawLine[i],{displayMode: mathMode})
+          parsedLine += katex.renderToString(rawLine[i], {displayMode: mathMode})
         }
         // Render unformatted text if there is an error
         catch (err) {
           var original = delimitEscaped + rawLine[i] + delimitEscaped
-          parsedLine = mathMode ? '<p style=\"text-align:center;\">' + original + "<p>" : original
+          parsedLine = mathMode ? '<p style=\"text-align:center;\">' + original + '<p>' : original
         }
       }
     }
@@ -56,6 +70,8 @@ var parseExpression = function(raw, delimit, delimitEscaped, mathMode, finalPass
 }
 
 var renderLaTeX = function(unparsed) {
+  delimitInitial = false
+
   // Need to parse for $$ first so it doesn't cause problems when check for $
   var parsed = parseExpression(unparsed, '$$', '\$\$', true)
   parsed = parseExpression(parsed, '$', '\$', false, true)
@@ -69,16 +85,14 @@ var templateEngine = function(filePath, options, callback) {
   var cssFile = '<link rel=\"stylesheet\" type=\"text/css\" href=\"//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css\">'
 
   return fs.readFile(filePath, function(err, content) {
-    if (err) return callback(new Error(err))
-      
+    if (err) {return callback(new Error(err))}
     var rendered = renderLaTeX(content.toString())
     rendered = rendered.replace('</head>', cssFile + '</head>')
     return callback(null, rendered)
   })
 }
 
-module.exports = 
-{ renderLaTeX: renderLaTeX
-, render: renderLaTeX
-, templateEngine: templateEngine
-}
+module.exports = { renderLaTeX: renderLaTeX
+                 , render: renderLaTeX
+                 , templateEngine: templateEngine
+                 }
