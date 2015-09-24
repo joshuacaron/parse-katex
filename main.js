@@ -39,7 +39,7 @@ function parseExpression(raw, delimit, delimitEscaped, mathMode, finalPass) {
       parsedLine = lines[j]
     }
     // Sum up the resulting lines and add newlines back in
-    output += j < lines.length - 1 && !finalPass ? parsedLine + '\n' : parsedLine
+    output += j < lines.length - 1 ? parsedLine + '\n' : parsedLine
   }
 
   if (delimitInitial && finalPass) {

@@ -1,6 +1,6 @@
 {
   "name": "parse-katex",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Parses all math sections inside HTML code with KaTeX.",
   "main": "main.js",
   "keywords": [
