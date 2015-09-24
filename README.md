@@ -1,4 +1,7 @@
 # parse-katex
+
+[![Build Status](https://travis-ci.org/joshuacaron/parse-katex.svg)](https://travis-ci.org/joshuacaron/parse-katex)
+
 Parses all HTML code and renders all LaTeX code (marked by $ ... $ for inline equations, and $$ ... $$ for display mode) to properly formatted expressions using [KaTeX](https://github.com/Khan/KaTeX).
 
 The benefit to using this package is you can pre-render all math content (when it is called from the database for instance) and serve it to the user as pure HTML, which is faster, doesn't cause the page to flicker/rearrange on load, and doesn't need them to have JavaScript enabled.
