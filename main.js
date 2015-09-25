@@ -90,8 +90,8 @@ var renderLaTeX = function(unparsed, config) {
 }
 
 var templateEngine = function(filePath, options, callback) {
-  var cssFile = '<link rel=\"stylesheet\" type=\"text/css\" href=\"//cdnjs.cloudflare.com/ajax/libs/KaTeX/' +
-    '0.3.0/katex.min.css\">'
+  var cssFile = '<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdnjs.cloudflare.com/ajax/libs/KaTeX/' +
+    '0.5.1/katex.min.css\">'
 
   return fs.readFile(filePath, function(err, content) {
     if (err) {return callback(new Error(err))}
