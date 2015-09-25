@@ -46,6 +46,9 @@ function parseExpression(raw, delimit, delimitEscaped, mathMode, finalPass) {
     output = output.slice(1, output.length)
   }
 
+  var r = new RegExp(_.escapeRegExp(_.escapeRegExp(delimitEscaped)), 'g')
+  output = output.replace(r, delimit)
+
   return output
 
   function processLine(rawLine) {
@@ -69,20 +72,26 @@ function parseExpression(raw, delimit, delimitEscaped, mathMode, finalPass) {
   }
 }
 
-var renderLaTeX = function(unparsed) {
+var renderLaTeX = function(unparsed, config) {
+  if (!config) {
+    config = [['$$', '\$\$', true], ['$', '\$', false]]
+  }
+
   delimitInitial = false
 
-  // Need to parse for $$ first so it doesn't cause problems when check for $
-  var parsed = parseExpression(unparsed, '$$', '\$\$', true)
-  parsed = parseExpression(parsed, '$', '\$', false, true)
+  var parsed = unparsed
+  for (var i = 0; i < config.length; ++i) {
+    var last = i === config.length - 1 ? true : false
 
-  // Render escaped dollar signs back to $
-  parsed = parsed.replace(/\\\$/g, '$')
+    parsed = parseExpression(parsed, config[i][0], config[i][1], config[i][2], last)
+  }
+
   return parsed
 }
 
 var templateEngine = function(filePath, options, callback) {
-  var cssFile = '<link rel=\"stylesheet\" type=\"text/css\" href=\"//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.3.0/katex.min.css\">'
+  var cssFile = '<link rel=\"stylesheet\" type=\"text/css\" href=\"//cdnjs.cloudflare.com/ajax/libs/KaTeX/' +
+    '0.3.0/katex.min.css\">'
 
   return fs.readFile(filePath, function(err, content) {
     if (err) {return callback(new Error(err))}
@@ -92,7 +101,7 @@ var templateEngine = function(filePath, options, callback) {
   })
 }
 
-module.exports = { renderLaTeX: renderLaTeX
-                 , render: renderLaTeX
-                 , templateEngine: templateEngine
+module.exports = {renderLaTeX: renderLaTeX,
+                  render: renderLaTeX,
+                  templateEngine: templateEngine
                  }
